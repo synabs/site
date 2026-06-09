@@ -1,0 +1,1732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AI Agent — Evolving AI Agents</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --black: #080808;
+    --white: #F8F8F8;
+    --accent: #00E5CC;
+    --accent-dim: rgba(0,229,204,0.12);
+    --mid: #141414;
+    --border: rgba(255,255,255,0.08);
+    --text-muted: rgba(248,248,248,0.45);
+    --text-secondary: rgba(248,248,248,0.72);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  .inner {
+    max-width: 1160px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.3s, background 0.3s;
+    padding: 0 24px;
+  }
+  .navbar-inner {
+    max-width: 1160px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 0;
+  }
+  nav.scrolled {
+    background: rgba(8,8,8,0.92);
+    backdrop-filter: blur(12px);
+    border-color: var(--border);
+  }
+  .nav-logo {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--white);
+    text-decoration: none;
+  }
+  .nav-logo span { color: var(--accent); }
+  .nav-links {
+    display: flex; gap: 36px; list-style: none;
+  }
+  .nav-links a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--white); }
+  .nav-cta {
+    border: 1px solid var(--accent);
+    color: var(--accent) !important;
+    padding: 8px 20px;
+    border-radius: 2px;
+    font-size: 12px !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase;
+    transition: background 0.2s !important;
+  }
+  .nav-cta:hover { background: var(--accent-dim) !important; color: var(--accent) !important; }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 0 24px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-grid-bg {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,204,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,204,0.03) 1px, transparent 1px);
+    background-size: 80px 80px;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 40%, black 30%, transparent 100%);
+  }
+  .hero-pulse {
+    position: absolute;
+    top: 18%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,229,204,0.07) 0%, transparent 65%);
+    animation: pulse 4s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.7; }
+    50% { transform: translateX(-50%) scale(1.15); opacity: 1; }
+  }
+  .hero-eyebrow {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .hero-eyebrow::before {
+    content: '';
+    display: block;
+    width: 32px; height: 1px;
+    background: var(--accent);
+  }
+  .hero-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(52px, 9vw, 120px);
+    font-weight: 700;
+    line-height: 0.92;
+    letter-spacing: -0.03em;
+    max-width: 900px;
+    margin-bottom: 36px;
+  }
+  .hero-title .line-accent { color: var(--accent); }
+  .hero-title .line-dim { color: var(--text-secondary); font-weight: 300; }
+  .hero-sub {
+    max-width: 420px;
+    color: var(--text-secondary);
+    font-size: 16px;
+    line-height: 1.7;
+    margin-bottom: 48px;
+  }
+  .hero-actions {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: var(--black);
+    padding: 14px 32px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: 2px;
+    transition: opacity 0.2s;
+  }
+  .btn-primary:hover { opacity: 0.85; }
+  .btn-ghost {
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    padding: 14px 32px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: 2px;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .btn-ghost:hover { border-color: var(--white); color: var(--white); }
+  .hero-content-inner {
+    max-width: 760px;
+    margin: 0 0 0 clamp(2rem, 12vw, 18rem);
+    width: 100%;
+  }
+  .hero-scroll-hint {
+    position: absolute;
+    bottom: 40px; right: 48px;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    writing-mode: vertical-rl;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .hero-scroll-hint::after {
+    content: '';
+    display: block;
+    width: 1px; height: 48px;
+    background: var(--text-muted);
+  }
+
+  /* ── TICKER ── */
+  .ticker-wrap {
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+    padding: 14px 0;
+    background: var(--mid);
+  }
+  .ticker-inner {
+    display: flex;
+    gap: 0;
+    white-space: nowrap;
+    animation: ticker 28s linear infinite;
+  }
+  @keyframes ticker {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  .ticker-item {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    gap: 32px;
+  }
+  .ticker-dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  /* ── SECTION SHARED ── */
+  section { padding: 120px 24px; }
+  .section-label {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 24px;
+  }
+  h2.section-heading {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(32px, 4vw, 52px);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.025em;
+  }
+
+  /* ── HOW IT WORKS ── */
+  .how {
+    border-top: 1px solid var(--border);
+  }
+  .how-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 72px;
+    gap: 40px;
+  }
+  .how-header .section-heading { max-width: 420px; }
+  .how-header p {
+    max-width: 340px;
+    color: var(--text-secondary);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+  .how-steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+  .how-step {
+    background: var(--black);
+    padding: 40px 32px;
+    position: relative;
+    transition: background 0.3s;
+  }
+  .how-step:hover { background: var(--mid); }
+  .how-step-num {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    color: var(--accent);
+    margin-bottom: 40px;
+  }
+  .how-step h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+  }
+  .how-step-arrow {
+    position: absolute;
+    top: 50%;
+    right: -12px;
+    transform: translateY(-50%);
+    width: 23px; height: 23px;
+    background: var(--black);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+  }
+  .how-step-arrow svg { color: var(--accent); }
+  .how-step:last-child .how-step-arrow { display: none; }
+
+  /* ── PROBLEMS ── */
+  .problems {
+    background: var(--mid);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .problems-header {
+    margin-bottom: 64px;
+  }
+  .problems-header .section-heading em {
+    font-style: normal;
+    color: var(--text-muted);
+    font-weight: 300;
+  }
+  .problems-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+  .problem-card {
+    background: var(--mid);
+    padding: 48px 40px;
+    transition: background 0.3s;
+  }
+  .problem-card:hover { background: #1a1a1a; }
+  .problem-num {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+  .problem-card h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.25;
+    margin-bottom: 16px;
+    letter-spacing: -0.015em;
+  }
+  .problem-card p {
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.75;
+  }
+
+  /* ── STAT SPOTLIGHT ── */
+  .stat-spotlight {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border-top: 1px solid var(--border);
+  }
+  .stat-spotlight-left {
+    padding: 120px 48px;
+    border-right: 1px solid var(--border);
+  }
+  .stat-big {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(80px, 12vw, 160px);
+    font-weight: 700;
+    line-height: 0.85;
+    letter-spacing: -0.04em;
+    color: var(--accent);
+    margin-bottom: 28px;
+  }
+  .stat-spotlight-left p {
+    font-size: 16px;
+    color: var(--text-secondary);
+    max-width: 360px;
+    line-height: 1.7;
+    margin-bottom: 12px;
+  }
+  .stat-source {
+    font-size: 11px !important;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted) !important;
+  }
+  .stat-spotlight-right {
+    padding: 120px 48px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .stat-spotlight-right h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(26px, 3vw, 38px);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 24px;
+  }
+  .stat-spotlight-right p {
+    color: var(--text-secondary);
+    font-size: 15px;
+    line-height: 1.75;
+    max-width: 380px;
+    margin-bottom: 36px;
+  }
+
+  /* ── COST COMPARISON ── */
+  .costs {
+    background: var(--mid);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .costs-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: start;
+  }
+  .costs-left h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(28px, 3.5vw, 44px);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+    margin-bottom: 20px;
+  }
+  .costs-left p {
+    color: var(--text-secondary);
+    font-size: 15px;
+    line-height: 1.7;
+    margin-bottom: 36px;
+  }
+  .cost-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .cost-table thead th {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .cost-table tbody td {
+    padding: 16px 16px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border);
+  }
+  .cost-table .td-amount { text-align: right; font-family: 'Space Grotesk', sans-serif; font-weight: 600; }
+  .cost-table .row-total td {
+    color: var(--white);
+    font-weight: 600;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .cost-vs {
+    background: var(--black);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 36px 32px;
+  }
+  .cost-vs-label {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+  .cost-vs-price {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 56px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    color: var(--white);
+    margin-bottom: 4px;
+  }
+  .cost-vs-period { font-size: 13px; color: var(--text-muted); margin-bottom: 28px; }
+  .cost-vs-features { list-style: none; }
+  .cost-vs-features li {
+    font-size: 13px;
+    color: var(--text-secondary);
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .cost-vs-features li::before {
+    content: '✓';
+    color: var(--accent);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+
+  /* ── METRICS ── */
+  .metrics {
+    border-top: 1px solid var(--border);
+  }
+  .metrics-header { margin-bottom: 72px; }
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+  .metric {
+    background: var(--black);
+    padding: 48px 36px;
+    transition: background 0.3s;
+  }
+  .metric:hover { background: var(--mid); }
+  .metric-value {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(36px, 5vw, 60px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    color: var(--white);
+    margin-bottom: 12px;
+  }
+  .metric-value span { color: var(--accent); }
+  .metric-label {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    max-width: 160px;
+  }
+
+  /* ── EVOLVE ── */
+  .evolve {
+    background: var(--mid);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .evolve-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+  .evolve-left h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(30px, 3.5vw, 46px);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+    margin-bottom: 20px;
+  }
+  .evolve-left p {
+    color: var(--text-secondary);
+    font-size: 15px;
+    line-height: 1.75;
+    margin-bottom: 40px;
+  }
+  .evolve-stages { display: flex; flex-direction: column; gap: 0; }
+  .evolve-stage {
+    display: flex;
+    gap: 20px;
+    padding: 24px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .evolve-stage:first-child { border-top: 1px solid var(--border); }
+  .stage-num {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    color: var(--accent);
+    padding-top: 2px;
+    min-width: 52px;
+  }
+  .stage-text h4 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .stage-text p {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 0;
+  }
+  /* Performance bar chart */
+  .evolve-right {
+    background: var(--black);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 40px;
+  }
+  .chart-label {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 32px;
+  }
+  .chart-row { margin-bottom: 20px; }
+  .chart-row-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .chart-row-label .pct { color: var(--white); font-weight: 600; }
+  .chart-bar-bg {
+    height: 6px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 1px;
+    overflow: hidden;
+  }
+  .chart-bar-fill {
+    height: 100%;
+    border-radius: 1px;
+    transition: width 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+    width: 0;
+  }
+  .chart-bar-fill.accent { background: var(--accent); }
+  .chart-bar-fill.accent-dim { background: rgba(0,229,204,0.45); }
+  .chart-bar-fill.muted { background: rgba(255,255,255,0.2); }
+  .chart-note {
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  /* ── CAPABILITIES ── */
+  .capabilities {
+    border-top: 1px solid var(--border);
+  }
+  .capabilities-header { margin-bottom: 64px; }
+  .cap-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+  .cap-card {
+    background: var(--black);
+    padding: 40px 36px;
+    transition: background 0.3s;
+  }
+  .cap-card:hover { background: var(--mid); }
+  .cap-icon {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    color: var(--accent);
+    margin-bottom: 24px;
+    border: 1px solid var(--accent-dim);
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 2px;
+  }
+  .cap-card h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+  }
+  .cap-card p {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  /* ── PRICING ── */
+  .pricing {
+    background: var(--mid);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .pricing-header { margin-bottom: 60px; }
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  .pricing-card {
+    background: var(--black);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 48px 44px;
+    position: relative;
+  }
+  .pricing-card--featured {
+    border-color: var(--accent);
+  }
+  .pricing-badge {
+    position: absolute;
+    top: -12px; left: 44px;
+    background: var(--accent);
+    color: var(--black);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 2px;
+  }
+  .pricing-card h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+  .pricing-amount {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 64px;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: var(--white);
+    margin-bottom: 4px;
+  }
+  .pricing-period {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  .pricing-messages {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 36px;
+  }
+  .pricing-features-list {
+    list-style: none;
+    margin-bottom: 40px;
+  }
+  .pricing-features-list li {
+    font-size: 13px;
+    color: var(--text-secondary);
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .pricing-features-list li::before {
+    content: '✓';
+    color: var(--accent);
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+  .pricing-cta {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+  .pricing-link {
+    font-size: 13px;
+    color: var(--text-muted);
+    text-decoration: none;
+    letter-spacing: 0.04em;
+    transition: color 0.2s;
+  }
+  .pricing-link:hover { color: var(--white); }
+  .pricing-card--secondary h3 { margin-bottom: 12px; }
+  .pricing-from { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
+  .pricing-card--secondary .pricing-amount { font-size: 44px; margin-bottom: 6px; }
+  .pricing-addon {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 36px;
+    line-height: 1.6;
+  }
+  .pricing-cancel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: -12px;
+    margin-bottom: 60px;
+  }
+  .pricing-cancel-check {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--accent-dim);
+    border: 1px solid var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: var(--accent);
+  }
+  .pricing-cancel span:last-child {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  /* ── ABOUT ── */
+  .about {
+    border-top: 1px solid var(--border);
+  }
+  .about-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
+  }
+  .about-left h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(28px, 3vw, 42px);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    margin-bottom: 24px;
+  }
+  .about-left p {
+    color: var(--text-secondary);
+    font-size: 15px;
+    line-height: 1.75;
+  }
+  .about-team { display: flex; flex-direction: column; gap: 32px; }
+  .about-member {
+    display: flex;
+    gap: 20px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+  }
+  .about-member:last-child { border-bottom: none; padding-bottom: 0; }
+  .about-avatar {
+    width: 56px; height: 56px;
+    border-radius: 2px;
+    background: var(--mid);
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .about-member-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+  .about-member-role {
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.06em;
+    margin-bottom: 10px;
+  }
+  .about-member-bio {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.65;
+  }
+
+  /* ── CTA ── */
+  .final-cta {
+    border-top: 1px solid var(--border);
+    padding: 140px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .final-cta-glow {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 800px; height: 400px;
+    background: radial-gradient(ellipse, rgba(0,229,204,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .final-cta h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(36px, 6vw, 80px);
+    font-weight: 700;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    margin-bottom: 32px;
+    position: relative;
+  }
+  .final-cta h2 em {
+    font-style: normal;
+    color: var(--accent);
+  }
+  .final-cta p {
+    color: var(--text-secondary);
+    font-size: 15px;
+    margin-bottom: 48px;
+    position: relative;
+  }
+  .final-cta .actions {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    position: relative;
+    margin-bottom: 20px;
+  }
+  .final-cta .small-note {
+    font-size: 12px;
+    color: var(--text-muted);
+    position: relative;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--mid);
+    border-top: 1px solid var(--border);
+    padding: 48px 24px;
+  }
+  .footer-inner {
+    max-width: 1160px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 32px;
+  }
+  .footer-logo {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .footer-logo span { color: var(--accent); }
+  .footer-links {
+    display: flex;
+    gap: 28px;
+    list-style: none;
+  }
+  .footer-links a {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-decoration: none;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-family: 'Space Grotesk', sans-serif;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--white); }
+  .footer-copy {
+    text-align: right;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+  }
+
+
+  /* Max-width constraint */
+  .how-header, .how-steps,
+  .problems-header, .problems-grid,
+  .stat-spotlight-left, .stat-spotlight-right,
+  .costs-inner,
+  .metrics-header, .metrics-grid,
+  .evolve-inner,
+  .capabilities-header, .cap-grid,
+  .pricing-header, .pricing-cancel, .pricing-grid,
+  .about-inner,
+  .final-cta > *,
+  .footer-logo, .footer-links, .footer-copy {
+    max-width: 1160px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .stat-spotlight-left, .stat-spotlight-right { max-width: none; }
+  .stat-spotlight { max-width: 1160px; margin-left: auto; margin-right: auto; }
+  footer > * { max-width: none; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    nav { padding: 16px 24px; }
+    .nav-links { display: none; }
+    section { padding: 80px 24px; }
+    .hero { padding: 0 24px 64px; }
+    .hero-content-inner {
+    max-width: 760px;
+    margin: 0;
+    width: 100%;
+  }
+  .hero-scroll-hint { display: none; }
+    .how-header { flex-direction: column; align-items: flex-start; gap: 20px; }
+    .how-steps { grid-template-columns: 1fr 1fr; }
+    .how-step-arrow { display: none; }
+    .stat-spotlight { grid-template-columns: 1fr; }
+    .stat-spotlight-left { border-right: none; border-bottom: 1px solid var(--border); }
+    .costs-inner { grid-template-columns: 1fr; gap: 40px; }
+    .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+    .evolve-inner { grid-template-columns: 1fr; gap: 48px; }
+    .cap-grid { grid-template-columns: 1fr 1fr; }
+    .pricing-grid { grid-template-columns: 1fr; }
+    .about-inner { grid-template-columns: 1fr; gap: 48px; }
+    .problems-grid { grid-template-columns: 1fr; }
+    .footer-inner { grid-template-columns: 1fr; text-align: center; }
+    .footer-copy { text-align: center; }
+    .footer-links { justify-content: center; flex-wrap: wrap; }
+    .final-cta { padding: 80px 24px; }
+  }
+  @media (max-width: 600px) {
+    .how-steps { grid-template-columns: 1fr; }
+    .metrics-grid { grid-template-columns: 1fr 1fr; }
+    .cap-grid { grid-template-columns: 1fr; }
+    .hero-title { font-size: 48px; }
+  }
+
+  /* ── ANIMATIONS ── */
+  .fade-up {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .fade-up.visible { opacity: 1; transform: translateY(0); }
+  .fade-up-delay-1 { transition-delay: 0.1s; }
+  .fade-up-delay-2 { transition-delay: 0.2s; }
+  .fade-up-delay-3 { transition-delay: 0.3s; }
+  .fade-up-delay-4 { transition-delay: 0.4s; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+
+  /* ── SETUP ── */
+  .setup {
+    border-top: 1px solid var(--border);
+    padding: 120px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .setup-inner {
+    max-width: 1160px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+  .setup-left h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(32px, 4vw, 56px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.0;
+    margin-bottom: 20px;
+  }
+  .setup-left p {
+    color: var(--text-secondary);
+    font-size: 15px;
+    line-height: 1.75;
+    margin-bottom: 32px;
+    max-width: 400px;
+  }
+  .setup-code {
+    background: var(--mid);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 28px 32px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    color: rgba(248,248,248,0.7);
+    line-height: 1.85;
+  }
+  .setup-code .sc-comment { color: rgba(248,248,248,0.25); }
+  .setup-code .sc-tag { color: #7dd3fc; }
+  .setup-code .sc-attr { color: #86efac; }
+  .setup-code .sc-val { color: #fca5a5; }
+  .setup-success {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    font-size: 13px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+  }
+  .setup-success-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+    flex-shrink: 0;
+  }
+  @media (max-width: 900px) {
+    .setup-inner { grid-template-columns: 1fr; gap: 48px; }
+    .setup-left p { max-width: 100%; }
+  }
+
+  /* ── FAQ ── */
+  .faq {
+    border-top: 1px solid var(--border);
+    padding: 120px 24px;
+  }
+  .faq-inner {
+    max-width: 1160px;
+    margin: 0 auto;
+  }
+  .faq-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 40px;
+    margin-bottom: 64px;
+  }
+  .faq-header h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(28px, 3.5vw, 48px);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.05;
+  }
+  .faq-list {
+    display: flex;
+    flex-direction: column;
+  }
+  .faq-item {
+    border-top: 1px solid var(--border);
+  }
+  .faq-item:last-child {
+    border-bottom: 1px solid var(--border);
+  }
+  .faq-question {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    padding: 24px 0;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--white);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    letter-spacing: -0.01em;
+    transition: color 0.2s;
+  }
+  .faq-question:hover { color: var(--accent); }
+  .faq-icon {
+    flex-shrink: 0;
+    width: 24px; height: 24px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: var(--text-muted);
+    transition: border-color 0.2s, color 0.2s, transform 0.3s;
+    line-height: 1;
+  }
+  .faq-item.open .faq-icon {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: rotate(45deg);
+  }
+  .faq-answer {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.75;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, padding-bottom 0.3s;
+  }
+  .faq-item.open .faq-answer {
+    max-height: 300px;
+    padding-bottom: 24px;
+  }
+  @media (max-width: 768px) {
+    .faq-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="navbar">
+<div class="navbar-inner">
+  <a href="#" class="nav-logo">AI <span>Agent</span></a>
+  <ul class="nav-links">
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#metrics">Results</a></li>
+    <li><a href="#capabilities">Capabilities</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#pricing" class="nav-cta">Start free trial</a></li>
+  </ul>
+</div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid-bg" aria-hidden="true"></div>
+  <div class="hero-pulse" aria-hidden="true"></div>
+  <div class="hero-content-inner">
+    <p class="hero-eyebrow">Next generation AI</p>
+    <h1 class="hero-title">
+      <span class="line-accent">Evolving</span><br>
+      AI<br>
+      <span class="line-dim">Agents</span>
+    </h1>
+    <p class="hero-sub">The first AI agents designed to adapt and improve over time — qualifying leads, answering questions, and driving conversions around the clock.</p>
+    <div class="hero-actions">
+      <a href="#pricing" class="btn-primary">Try it free 14 days</a>
+      <a href="#how" class="btn-ghost">See how it works</a>
+    </div>
+  </div>
+  <div class="hero-scroll-hint" aria-hidden="true">Scroll to explore</div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker-wrap" aria-hidden="true">
+  <div class="ticker-inner">
+    <div class="ticker-item"><span class="ticker-dot"></span>Evolves every week</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>2 minute install</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Zero leads missed</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Powered by Cortex Engine</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Automatic language detection</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Calendly booking</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Lead qualification 24/7</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Evolves every week</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>2 minute install</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Zero leads missed</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Powered by Cortex Engine</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Automatic language detection</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Calendly booking</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Lead qualification 24/7</div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <div class="how-header">
+    <div>
+      <p class="section-label">How it works</p>
+      <h2 class="section-heading fade-up">Agents get smarter<br>with every conversation</h2>
+    </div>
+    <p class="fade-up fade-up-delay-1">The AI reviews every conversation, identifies what drives conversions, and improves automatically. No manual tuning required.</p>
+  </div>
+  <div class="how-steps">
+    <div class="how-step fade-up">
+      <p class="how-step-num">01</p>
+      <h3>Captures every customer live chat</h3>
+      <div class="how-step-arrow"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5h6M5.5 2.5L8 5l-2.5 2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    </div>
+    <div class="how-step fade-up fade-up-delay-1">
+      <p class="how-step-num">02</p>
+      <h3>Detects patterns in every conversation</h3>
+      <div class="how-step-arrow"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5h6M5.5 2.5L8 5l-2.5 2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    </div>
+    <div class="how-step fade-up fade-up-delay-2">
+      <p class="how-step-num">03</p>
+      <h3>Studies patterns and optimizes responses</h3>
+      <div class="how-step-arrow"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5h6M5.5 2.5L8 5l-2.5 2.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    </div>
+    <div class="how-step fade-up fade-up-delay-3">
+      <p class="how-step-num">04</p>
+      <h3>Predicts conversation flow to maximize value</h3>
+    </div>
+  </div>
+</section>
+
+<!-- SETUP -->
+<section class="setup" id="setup">
+  <div class="setup-inner">
+    <div class="setup-left fade-up">
+      <p class="section-label">Setup</p>
+      <h2>2 minute install.</h2>
+      <p>One line of code. Add it yourself or we'll do it together. Your AI agent goes live instantly — no configuration, no onboarding call, no waiting.</p>
+      <a href="#" class="btn-primary">Try it free 14 days</a>
+    </div>
+    <div class="fade-up fade-up-delay-1">
+      <div class="setup-code">
+        <span class="sc-comment">&lt;!-- Add before &lt;/body&gt; --&gt;</span><br>
+        <span class="sc-tag">&lt;script</span><br>
+        &nbsp;&nbsp;<span class="sc-attr">src</span>=<span class="sc-val">"https://agent.ai/v1/embed.js"</span><br>
+        &nbsp;&nbsp;<span class="sc-attr">data-id</span>=<span class="sc-val">"your-agent-id"</span><br>
+        <span class="sc-tag">&gt;&lt;/script&gt;</span>
+      </div>
+      <div class="setup-success">
+        <span class="setup-success-dot"></span>
+        Agent live. Learning started.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEMS -->
+<section class="problems">
+  <div class="problems-header">
+    <p class="section-label">The problem</p>
+    <h2 class="section-heading fade-up">You're losing leads<br>every day they go <em>unanswered</em></h2>
+  </div>
+  <div class="problems-grid">
+    <div class="problem-card fade-up">
+      <p class="problem-num">001</p>
+      <h3>Your leads don't wait until Monday</h3>
+      <p>Most purchase decisions happen outside 9–5. Every unanswered chat after hours is a qualified lead handed to a competitor who was awake.</p>
+    </div>
+    <div class="problem-card fade-up fade-up-delay-1">
+      <p class="problem-num">002</p>
+      <h3>Response time is your conversion rate</h3>
+      <p>Harvard Business Review found companies responding within one hour are nearly 7× more likely to qualify a lead. Human teams can't sustain that. AI agent can.</p>
+    </div>
+    <div class="problem-card fade-up fade-up-delay-2">
+      <p class="problem-num">003</p>
+      <h3>Old chatbots don't learn. They just repeat.</h3>
+      <p>Rule-based bots give the same wrong answers forever. They don't adapt, they don't improve, and customers notice. AI agent gets better every single week.</p>
+    </div>
+    <div class="problem-card fade-up fade-up-delay-3">
+      <p class="problem-num">004</p>
+      <h3>Customer support staff is expensive</h3>
+      <p>Salaries, training, turnover, sick days. Most businesses spend over 2,000€ a month on what AI agent does for 349€ — around the clock, without breaks.</p>
+    </div>
+  </div>
+</section>
+
+<!-- STAT SPOTLIGHT -->
+<section class="stat-spotlight">
+  <div class="stat-spotlight-left">
+    <p class="section-label">Research</p>
+    <div class="stat-big fade-up">7×</div>
+    <p class="fade-up fade-up-delay-1">Companies that respond to leads within one hour are nearly 7× more likely to qualify them — compared to those who wait just two hours.</p>
+    <p class="stat-source fade-up fade-up-delay-2">Source: Harvard Business Review · Speed-to-lead study</p>
+  </div>
+  <div class="stat-spotlight-right">
+    <p class="section-label">Speed drives conversions</p>
+    <h2 class="fade-up">AI agent captures and qualifies leads from your website chat instantly, around the clock.</h2>
+    <p class="fade-up fade-up-delay-1">No delays, no handoffs, no missed windows. Every visitor gets a response in under 2 seconds — whether it's 2 PM or 2 AM.</p>
+    <a href="#pricing" class="btn-primary fade-up fade-up-delay-2" style="align-self:flex-start">See how it works</a>
+  </div>
+</section>
+
+<!-- COST COMPARISON -->
+<section class="costs">
+  <div class="costs-inner">
+    <div class="costs-left">
+      <p class="section-label">Estimated cost comparison</p>
+      <h2 class="fade-up">Most businesses spend over 2,000€ on what AI agent does for 349€</h2>
+      <p class="fade-up fade-up-delay-1">Customer support staff, routine inquiries, and leads lost outside office hours all add up fast. AI agent handles all of it, 24/7.</p>
+      <a href="#pricing" class="btn-primary fade-up fade-up-delay-2">Cut your costs</a>
+      <br><br>
+      <table class="cost-table fade-up fade-up-delay-3">
+        <thead>
+          <tr>
+            <th>Without AI agent</th>
+            <th class="td-amount">Monthly</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Customer support (part-time)</td><td class="td-amount">1,200€</td></tr>
+          <tr><td>Leads lost after hours (est.)</td><td class="td-amount">600€+</td></tr>
+          <tr><td>Routine inquiry handling</td><td class="td-amount">400€</td></tr>
+          <tr class="row-total"><td>Monthly total</td><td class="td-amount">2,200€+</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="costs-right fade-up fade-up-delay-1">
+      <div class="cost-vs">
+        <p class="cost-vs-label">With AI Agent</p>
+        <div class="cost-vs-price">349€</div>
+        <p class="cost-vs-period">per month · all-in</p>
+        <ul class="cost-vs-features">
+          <li>24/7 lead capture &amp; qualification</li>
+          <li>Routine inquiry handling</li>
+          <li>Calendly booking + follow-ups</li>
+          <li>Automatic language detection</li>
+          <li>Monthly performance reports</li>
+          <li>Powered by Cortex Engine</li>
+          <li>14-day free trial · cancel anytime</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- METRICS -->
+<section class="metrics" id="metrics">
+  <div class="metrics-header">
+    <p class="section-label">Early results</p>
+    <h2 class="section-heading fade-up">Numbers that move<br>the needle</h2>
+  </div>
+  <div class="metrics-grid">
+    <div class="metric fade-up">
+      <div class="metric-value"><span>&lt;2s</span></div>
+      <div class="metric-label">Average response time — every conversation, every time</div>
+    </div>
+    <div class="metric fade-up fade-up-delay-1">
+      <div class="metric-value"><span>96</span>%</div>
+      <div class="metric-label">Of conversations handled without human escalation</div>
+    </div>
+    <div class="metric fade-up fade-up-delay-2">
+      <div class="metric-value">+<span>23</span>%</div>
+      <div class="metric-label">Average increase in qualified leads across early testers</div>
+    </div>
+    <div class="metric fade-up fade-up-delay-3">
+      <div class="metric-value"><span>0</span></div>
+      <div class="metric-label">Leads missed outside office hours</div>
+    </div>
+  </div>
+</section>
+
+<!-- EVOLVE -->
+<section class="evolve">
+  <div class="evolve-inner">
+    <div class="evolve-left">
+      <p class="section-label">Next generation</p>
+      <h2 class="fade-up">Evolves every week.<br>Outplays competitors.</h2>
+      <p class="fade-up fade-up-delay-1">The AI reviews every conversation, identifies what leads to conversions, and improves future responses automatically. No manual tuning required.</p>
+      <div class="evolve-stages fade-up fade-up-delay-2">
+        <div class="evolve-stage">
+          <span class="stage-num">Stage 01</span>
+          <div class="stage-text">
+            <h4>Trained on your business from day one</h4>
+            <p>Upload your website, docs, and FAQs. The agent learns your products, tone, and objections before the first chat.</p>
+          </div>
+        </div>
+        <div class="evolve-stage">
+          <span class="stage-num">Stage 02</span>
+          <div class="stage-text">
+            <h4>Detects patterns that lead to conversions</h4>
+            <p>Every question it can't answer becomes a training signal. Patterns that convert get reinforced automatically.</p>
+          </div>
+        </div>
+        <div class="evolve-stage">
+          <span class="stage-num">Stage 03</span>
+          <div class="stage-text">
+            <h4>Predicts intent and acts before you ask</h4>
+            <p>After weeks of data, the agent anticipates what visitors need — and guides them toward a decision.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="evolve-right fade-up fade-up-delay-1">
+      <p class="chart-label">Lead qualification rate · performance after deployment</p>
+      <div class="chart-row">
+        <div class="chart-row-label"><span>AI Agent — week 8</span><span class="pct">79%</span></div>
+        <div class="chart-bar-bg"><div class="chart-bar-fill accent" data-width="79"></div></div>
+      </div>
+      <div class="chart-row">
+        <div class="chart-row-label"><span>AI Agent — week 1</span><span class="pct">61%</span></div>
+        <div class="chart-bar-bg"><div class="chart-bar-fill accent-dim" data-width="61"></div></div>
+      </div>
+      <div class="chart-row">
+        <div class="chart-row-label"><span>Static chatbot</span><span class="pct">38%</span></div>
+        <div class="chart-bar-bg"><div class="chart-bar-fill muted" data-width="38"></div></div>
+      </div>
+      <p class="chart-note">The agent improves every week as it learns your best-converting patterns and replicates them. No manual tuning. Fully automatic.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CAPABILITIES -->
+<section class="capabilities" id="capabilities">
+  <div class="capabilities-header">
+    <p class="section-label">Capabilities</p>
+    <h2 class="section-heading fade-up">Built for complexity</h2>
+  </div>
+  <div class="cap-grid">
+    <div class="cap-card fade-up">
+      <span class="cap-icon">01</span>
+      <h3>Works on any website</h3>
+      <p>Compatible with WordPress, Shopify, Webflow, and custom builds. One line of code. Live in two minutes. No developer required.</p>
+    </div>
+    <div class="cap-card fade-up fade-up-delay-1">
+      <span class="cap-icon">02</span>
+      <h3>Powered by Cortex Engine</h3>
+      <p>Analyzes intent, context, and sentiment in real time — and feeds every insight back into the model's weekly evolution.</p>
+    </div>
+    <div class="cap-card fade-up fade-up-delay-2">
+      <span class="cap-icon">03</span>
+      <h3>Qualifies and books leads automatically</h3>
+      <p>Captures contact details, asks qualifying questions, and books straight into Calendly — all without a human in the loop.</p>
+    </div>
+    <div class="cap-card fade-up">
+      <span class="cap-icon">04</span>
+      <h3>Handles support and sales together</h3>
+      <p>Answers FAQs, handles objections, and escalates to a human only when it truly matters.</p>
+    </div>
+    <div class="cap-card fade-up fade-up-delay-1">
+      <span class="cap-icon">05</span>
+      <h3>Automatic language detection</h3>
+      <p>Detects the visitor's language and switches instantly. No configuration. Works across all markets your website reaches.</p>
+    </div>
+    <div class="cap-card fade-up fade-up-delay-2">
+      <span class="cap-icon">06</span>
+      <h3>Monthly performance reports</h3>
+      <p>A clear monthly summary of conversations handled, leads captured, and what the agent learned — so you always know what's working.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing" id="pricing">
+  <div class="pricing-header">
+    <p class="section-label">Pricing</p>
+    <h2 class="section-heading fade-up">Get the AI agent that evolves<br>with every customer chat</h2>
+  </div>
+  <div class="pricing-cancel fade-up">
+    <span class="pricing-cancel-check">✓</span>
+    <span>Cancel anytime</span>
+  </div>
+  <div class="pricing-grid">
+    <div class="pricing-card pricing-card--featured fade-up">
+      <div class="pricing-badge">Most popular</div>
+      <h3>AI Agent</h3>
+      <div class="pricing-amount">349€</div>
+      <p class="pricing-period">per month</p>
+      <p class="pricing-messages">5,000 messages / month · +€0.06 per message overage</p>
+      <ul class="pricing-features-list">
+        <li>Evolving AI — improves every week</li>
+        <li>Trained on your business</li>
+        <li>Lead capture 24/7</li>
+        <li>Lead qualification</li>
+        <li>Calendly booking integration</li>
+        <li>Monthly Performance Reports</li>
+        <li>Automatic language detection</li>
+        <li>Powered by Cortex Engine</li>
+      </ul>
+      <div class="pricing-cta">
+        <a href="#" class="btn-primary">Free 14-day trial</a>
+        <a href="#" class="pricing-link">Watch demo →</a>
+      </div>
+    </div>
+    <div class="pricing-card pricing-card--secondary fade-up fade-up-delay-1">
+      <h3>AI Agent + CRM Integration</h3>
+      <p class="pricing-from">From</p>
+      <div class="pricing-amount">349€</div>
+      <p class="pricing-period">per month</p>
+      <p class="pricing-addon">+ CRM integration add-on via Zapier.<br>Connect to any CRM you already use.</p>
+      <div class="pricing-cta">
+        <a href="#" class="btn-ghost">Let's talk</a>
+        <a href="#" class="pricing-link">See options →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="about" id="about">
+  <div class="about-inner">
+    <div class="about-left">
+      <p class="section-label">About</p>
+      <h2 class="fade-up">Built by people who believe AI should earn its keep</h2>
+      <p class="fade-up fade-up-delay-1">Many businesses lose revenue by failing to engage customers and leads outside business hours. We help capture these opportunities with adaptive AI agents that learn continuously — turning customer data into smarter engagement, better targeting, and measurable growth.</p>
+    </div>
+    <div class="about-team">
+      <div class="about-member fade-up">
+        <div class="about-avatar">JK</div>
+        <div>
+          <p class="about-member-name">Jani Karkulahti</p>
+          <p class="about-member-role">Founder &amp; AI Engineer</p>
+          <p class="about-member-bio">AI expert specializing in AI-powered products, automation, and system architecture, with a proven track record in building technology platforms that scale.</p>
+        </div>
+      </div>
+      <div class="about-member fade-up fade-up-delay-1">
+        <div class="about-avatar">SK</div>
+        <div>
+          <p class="about-member-name">Santeri Koskinen</p>
+          <p class="about-member-role">Co-Founder &amp; Head of Business</p>
+          <p class="about-member-bio">Serial entrepreneur with a proven history of building successful startups and leading the strategic vision — from zero to traction to growth.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq" id="faq">
+  <div class="faq-inner">
+    <div class="faq-header">
+      <div>
+        <p class="section-label">FAQ</p>
+        <h2 class="fade-up">Frequently asked<br>questions.</h2>
+      </div>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item fade-up">
+        <button class="faq-question">What exactly does "evolving" mean? <span class="faq-icon">+</span></button>
+        <div class="faq-answer">The AI agent reviews every conversation it has with your visitors, identifies what language, questions, and flows lead to conversions, and updates its responses weekly. No manual input needed — it adapts automatically based on real data from your site.</div>
+      </div>
+      <div class="faq-item fade-up">
+        <button class="faq-question">How long does installation take? <span class="faq-icon">+</span></button>
+        <div class="faq-answer">About two minutes. You add one line of code before the closing &lt;/body&gt; tag. If you'd prefer, we can walk you through it on a short call — or do it for you entirely.</div>
+      </div>
+      <div class="faq-item fade-up">
+        <button class="faq-question">How is AI Agent different from a regular chatbot? <span class="faq-icon">+</span></button>
+        <div class="faq-answer">Regular chatbots follow fixed rules and give the same answers forever. AI Agent learns from every conversation, adapts its responses weekly, and gets measurably better at qualifying leads over time. It also detects language, books via Calendly, and handles both support and sales in one agent.</div>
+      </div>
+      <div class="faq-item fade-up">
+        <button class="faq-question">What happens when the agent can't answer something? <span class="faq-icon">+</span></button>
+        <div class="faq-answer">The agent flags the question as a knowledge gap, and it becomes a training signal for the next weekly update. In the meantime, it handles the situation gracefully — collecting the visitor's contact details and routing to a human if needed.</div>
+      </div>
+      <div class="faq-item fade-up">
+        <button class="faq-question">What CRM integrations are available? <span class="faq-icon">+</span></button>
+        <div class="faq-answer">We integrate via Zapier, which connects to most major CRMs including HubSpot, Salesforce, Pipedrive, and others. Native integrations for select platforms are also available — contact us to discuss your stack.</div>
+      </div>
+      <div class="faq-item fade-up">
+        <button class="faq-question">Can I cancel anytime? <span class="faq-icon">+</span></button>
+        <div class="faq-answer">Yes. No contracts, no lock-in. Cancel from your dashboard at any time. Your agent stops at the end of your billing period.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-cta">
+  <div class="final-cta-glow" aria-hidden="true"></div>
+  <h2 class="fade-up">The last AI agent<br>you'll ever need to <em>upgrade</em></h2>
+  <p class="fade-up fade-up-delay-1">14-day free trial · No credit card required · Cancel anytime</p>
+  <div class="actions fade-up fade-up-delay-2">
+    <a href="#pricing" class="btn-primary">Try it free 14 days</a>
+    <a href="#" class="btn-ghost">Watch Demo</a>
+  </div>
+  <p class="small-note fade-up fade-up-delay-3">Evolving now.</p>
+</section>
+
+<!-- FOOTER -->
+<footer>
+<div class="footer-inner">
+  <div class="footer-logo">AI <span>Agent</span></div>
+  <ul class="footer-links">
+    <li><a href="#">About</a></li>
+    <li><a href="#">Pricing</a></li>
+    <li><a href="#">Performance</a></li>
+    <li><a href="#">Integrations</a></li>
+    <li><a href="#">Technology</a></li>
+  </ul>
+  <p class="footer-copy">© 2026 AI Agent. All rights reserved.</p>
+</div>
+</footer>
+
+<script>
+  // Navbar scroll
+  const navbar = document.getElementById('navbar')
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 40)
+  }, { passive: true })
+
+  // Fade-up observer
+  const fadeEls = document.querySelectorAll('.fade-up')
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible')
+        observer.unobserve(e.target)
+      }
+    })
+  }, { threshold: 0.12 })
+  fadeEls.forEach(el => observer.observe(el))
+
+  // FAQ toggle
+  document.querySelectorAll('.faq-question').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.faq-item')
+      const isOpen = item.classList.contains('open')
+      document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'))
+      if (!isOpen) item.classList.add('open')
+    })
+  })
+
+  // Bar chart animation
+  const barObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.querySelectorAll('.chart-bar-fill').forEach(bar => {
+          const w = bar.getAttribute('data-width')
+          bar.style.width = w + '%'
+        })
+        barObserver.unobserve(e.target)
+      }
+    })
+  }, { threshold: 0.3 })
+  const evolveRight = document.querySelector('.evolve-right')
+  if (evolveRight) barObserver.observe(evolveRight)
+</script>
+</body>
+</html>
